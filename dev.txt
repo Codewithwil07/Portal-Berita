@@ -1,0 +1,29 @@
+Untuk proyek web development, jenis kode HTTP (status code) yang sesuai biasanya tergantung pada respons yang ingin diberikan server terhadap permintaan dari klien. Berikut ini adalah beberapa jenis kode HTTP yang umum digunakan dan situasi di mana mereka digunakan:
+
+1. **Kode 1xx (Informational Response):**
+   - **100 Continue:** Klien dapat melanjutkan permintaan. Biasanya digunakan untuk memeriksa apakah server siap menerima permintaan besar.
+
+2. **Kode 2xx (Success):**
+   - **200 OK:** Permintaan berhasil diproses. Ini adalah kode yang paling umum untuk respons sukses.
+   - **201 Created:** Digunakan saat resource baru berhasil dibuat, seperti saat pengguna berhasil mendaftar.
+   - **202 Accepted:** Permintaan telah diterima untuk diproses, tetapi belum selesai.
+   - **204 No Content:** Permintaan berhasil, tetapi tidak ada konten yang dikembalikan (misalnya, penghapusan resource).
+
+3. **Kode 3xx (Redirection):**
+   - **301 Moved Permanently:** Resource telah dipindahkan ke URL baru secara permanen.
+   - **302 Found:** Resource sementara tersedia di URL yang berbeda.
+   - **304 Not Modified:** Resource tidak berubah sejak permintaan terakhir, sehingga klien dapat menggunakan versi cache.
+
+4. **Kode 4xx (Client Error):**
+   - **400 Bad Request:** Permintaan tidak valid atau sintaksisnya salah.
+   - **401 Unauthorized:** Klien perlu otentikasi untuk mengakses resource.
+   - **403 Forbidden:** Klien tidak memiliki hak akses terhadap resource yang diminta.
+   - **404 Not Found:** Resource yang diminta tidak ditemukan di server.
+   - **422 Unprocessable Entity:** Server memahami permintaan, tetapi tidak dapat memprosesnya, sering digunakan untuk validasi input yang gagal.
+
+5. **Kode 5xx (Server Error):**
+   - **500 Internal Server Error:** Terjadi kesalahan di server saat memproses permintaan.
+   - **502 Bad Gateway:** Server bertindak sebagai gateway atau proxy, dan menerima respons yang tidak valid dari server hulu.
+   - **503 Service Unavailable:** Server tidak dapat menangani permintaan saat ini karena kelebihan beban atau pemeliharaan.
+
+Jenis kode HTTP ini harus digunakan secara sesuai dengan konteks respons dari API atau aplikasi web yang kamu kembangkan. Misalnya, saat pengguna berhasil login, kamu mungkin akan mengirimkan kode **200 OK** dengan data pengguna. Sedangkan jika pengguna mencoba mengakses halaman yang tidak ada, maka kamu akan mengirimkan kode **404 Not Found**.
