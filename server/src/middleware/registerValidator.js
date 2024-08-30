@@ -1,7 +1,7 @@
 const { body, validationResult } = require('express-validator');
 
 const registervalidator = [
-  body('name')
+  body('username')
     .isLength({ min: 1 })
     .withMessage('Nama tidak boleh kosong')
     .trim()

@@ -1,4 +1,5 @@
 const User = require('../model/user.model');
+const bcrypt = require('bcrypt');
 
 // Administrator
 const getallUsers = async (name, email, pasword) => {
@@ -17,23 +18,30 @@ const removeUserbyId = (user) => {
 
 // Auth
 const registerUser = async (username, email, password) => {
-  const existingUser = await User.findFirst(username, email);
-  if (existingUser) throw new Error(`Username dan Email sudah ada`);
+  try {
+    const existingUser = await User.findUnique({ where: { username } });
+    if (existingUser) {
+      throw new Error('Username sudah ada');
+    }
 
-  const salt = bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
+    const existingEmail = await User.findUnique({ where: { email } });
+    if (existingEmail) {
+      throw new Error('Email sudah ada');
+    }
 
-  return await User.createUser(username, email, hashedPassword);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUser = await User.create({
+      data: { username: username, email: email, password: hashedPassword },
+    });
+
+    return newUser;
+  } catch (error) {
+    throw error;
+  }
 };
 
-const loginUser = async (email, password) => {
-  const userPassword = await User.findUnique(password);
-
-  const comparePassword = await bcrypt.compare(userPassword, password);
-  if (!comparePassword) throw new Error('Password salah');
-
-  return User.findFirst(email, password);
-};
 
 module.exports = {
   getallUsers,
@@ -41,5 +49,4 @@ module.exports = {
   updateUserbyId,
   removeUserbyId,
   registerUser,
-  loginUser,
 };
