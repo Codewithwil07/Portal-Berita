@@ -8,9 +8,20 @@ const ensureAuthenticated = require('../middleware/authenication');
 const ensureAdmin = require('../middleware/authorization');
 
 // Admin routes
-router
-  .route('/admin')
-  .get(ensureAuthenticated, ensureAdmin, User.getallUserHandler);
+router.get('/admin', ensureAuthenticated, ensureAdmin, User.fetchUserHandler);
+router.post(
+  '/admin/:id',
+  ensureAuthenticated,
+  ensureAdmin,
+  User.updateUserbyIdHandler
+);
+
+router.delete(
+  '/admin/:id',
+  ensureAuthenticated,
+  ensureAdmin,
+  User.removeUserbyIdHandler
+);
 
 // Auth routes
 router.post('/register', registervalidator, User.registerUserHandler);
@@ -52,9 +63,7 @@ router.get('/protected', ensureAuthenticated, (req, res) => {
 });
 
 router.get('/isAdmin', ensureAuthenticated, ensureAdmin, (req, res) => {
-  res
-    .status(200)
-    .json({ message: 'hanya Admin yang memiliki akses ke route ini' });
+  res.status(200).json({ message: 'Kamu Admin' });
 });
 
 //User routes

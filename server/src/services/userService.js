@@ -2,18 +2,57 @@ const User = require('../model/user.model');
 const bcrypt = require('bcrypt');
 
 // Administrator
-const getallUsers = async (name, email, pasword) => {
-  return await User.findFirst(name, email, pasword);
+const fetchUsers = async (page, perPage) => {
+  try {
+    page = parseInt(page, 10) || 1;
+    perPage = parseInt(perPage, 10) || 10;
+
+    const offsetPage = (page - 1) * perPage;
+
+    const users = await User.findMany({
+      skip: offsetPage,
+      take: perPage,
+    });
+
+    if (!users) throw new Error('Pengguna tidak ada');
+
+    const totalUsers = await User.count();
+    const totalPages = Math.ceil(totalUsers / perPage);
+
+    return { users, totalPages, totalUsers };
+  } catch (error) {
+    throw error;
+  }
 };
 
-const getUserById = (user) => {
-  return;
+const updateUserbyId = async (userId, data) => {
+  try {
+    const userUpdated = await User.update({
+      where: { id: userId },
+      data: data,
+    });
+    if (!userUpdated) throw new Error('User tidak ada');
+
+    if (userUpdated) {
+      userUpdated.username = data.username;
+      userUpdated.email = data.email;
+    }
+
+    return userUpdated;
+  } catch (error) {
+    throw error;
+  }
 };
-const updateUserbyId = (user) => {
-  return;
-};
-const removeUserbyId = (user) => {
-  return;
+
+const removeUserbyId = async (userId) => {
+  try {
+    const removeUser = await User.delete({ where: { id: userId } });
+    if (!removeUser) throw new Error('User tidak ada');
+
+    return removeUser;
+  } catch (error) {
+    throw Error;
+  }
 };
 
 // Auth
@@ -42,10 +81,8 @@ const registerUser = async (username, email, password) => {
   }
 };
 
-
 module.exports = {
-  getallUsers,
-  getUserById,
+  fetchUsers,
   updateUserbyId,
   removeUserbyId,
   registerUser,
