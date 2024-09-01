@@ -27,6 +27,19 @@ const fetchUsers = async (page, perPage) => {
 
 const updateUserbyId = async (userId, data) => {
   try {
+    if (!data.username || !data.password || !data.role)
+      throw new Error('Form tidak boleh kosong');
+
+    const existingUser = await User.findUnique({ where: { username } });
+    if (existingUser) {
+      throw new Error('Username sudah ada');
+    }
+
+    const existingEmail = await User.findUnique({ where: { email } });
+    if (existingEmail) {
+      throw new Error('Email sudah ada');
+    }
+
     const userUpdated = await User.update({
       where: { id: userId },
       data: data,
@@ -36,6 +49,7 @@ const updateUserbyId = async (userId, data) => {
     if (userUpdated) {
       userUpdated.username = data.username;
       userUpdated.email = data.email;
+      userUpdated.role = data.role;
     }
 
     return userUpdated;
@@ -72,10 +86,24 @@ const registerUser = async (username, email, password) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = await User.create({
-      data: { username: username, email: email, password: hashedPassword },
+      data: { username: username, email: email, passwordHash: hashedPassword },
     });
 
     return newUser;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const loginUser = async (email, password) => {
+  try {
+    const user = await User.findUnique({ where: { email } });
+    if (!user) throw new Error('Email anda  tidak cocok');
+
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    if (!isMatch) throw new Error('Password anda Salah');
+
+    return user;
   } catch (error) {
     throw error;
   }
@@ -86,4 +114,5 @@ module.exports = {
   updateUserbyId,
   removeUserbyId,
   registerUser,
+  loginUser,
 };

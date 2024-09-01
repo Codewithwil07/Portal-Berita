@@ -1,8 +1,8 @@
-const ensureAuthenticated = (req, res, next) => {
-  if (req.isAuthenticated()) {
+const isAuthenticated = (req, res, next) => {
+  if (req.session.isAuthenticated) {
     return next();
   }
-  res.status(401).send('anda belum ter-autentikasi');
+  res.status(401).send('anda belum ter-autentikasi dan login lah');
 };
 
-module.exports = ensureAuthenticated;
+module.exports = isAuthenticated;

@@ -24,10 +24,10 @@ exports.fetchUserHandler = async (req, res) => {
 };
 
 exports.updateUserbyIdHandler = async (req, res) => {
-  const { username, email } = req.body;
+  const { username, email, role } = req.body;
   const userId = parseInt(req.params.id, 10);
   try {
-    const user = await userService.updateUserbyId(userId, { username, email });
+    const user = await userService.updateUserbyId(userId, { username, email, role });
     res.status(201).json(user);
   } catch (error) {
     if (error.message) {
@@ -65,13 +65,16 @@ exports.registerUserHandler = async (req, res) => {
   }
 };
 
-// exports.loginUserHandler = async (req, res) => {
-//   const { email, password } = req.body;
-//   try {
-//     const user = await userService.loginUser(email, password);
-//     res.status(200).send(user);
-//   } catch (error) {
-//     console.error(error.message);
-//     res.status(500).send('internal server error');
-//   }
-// };
+exports.loginUserHandler = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await userService.loginUser(email, password);
+    req.session.userId = user.id;
+    req.session.isAuthenticated = true;
+    req.session.user = user;
+    res.status(200).send({ user });
+  } catch (error) {
+    if (error.message) return res.status(400).send(error.message);
+    res.status(500).send('internal server error');
+  }
+};
