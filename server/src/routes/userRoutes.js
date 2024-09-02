@@ -8,6 +8,13 @@ const isAuthenticated = require('../middleware/authenication');
 const Ensure = require('../middleware/authorization');
 
 // Admin routes
+router.post(
+  '/admin/newUser',
+  isAuthenticated,
+  Ensure.isAdmin,
+  registervalidator,
+  User.createuserHandler
+);
 router.get('/admin', isAuthenticated, Ensure.isAdmin, User.fetchUserHandler);
 router.post(
   '/admin/:id',
@@ -36,11 +43,13 @@ router.get('/logout', (req, res) => {
   });
 });
 
+
+
 router.get('/protected', isAuthenticated, (req, res) => {
   res.status(200).json({ message: 'Anda memiliki akses ke route ini' });
 });
 router.get('/isAdmin', isAuthenticated, Ensure.isAdmin, (req, res) => {
-    res.status(200).json({ message: 'Kamu Admin' });
+  res.status(200).json({ message: 'Kamu Admin' });
 });
 router.get('/isEditor', isAuthenticated, Ensure.isEditor, (req, res) => {
   res.status(200).json({ message: 'Kamu Editor' });

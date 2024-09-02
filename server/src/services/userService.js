@@ -1,7 +1,36 @@
+const { body } = require('express-validator');
 const User = require('../model/user.model');
 const bcrypt = require('bcrypt');
 
 // Administrator
+const createUser = async (username, email, password) => {
+  try {
+    const existingUser = await User.findUnique({
+      where: { username: username },
+    });
+
+    if (existingUser) {
+      throw new Error('username sudah ada');
+    }
+
+    const existingEmail = await User.findUnique({
+      where: { email: email },
+    });
+
+    if (existingEmail) {
+      throw new Error('Email sudah ada');
+    }
+
+    const user = await User.create({
+      data: { username: username, email: email, passwordHash: password },
+    });
+
+    return user;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const fetchUsers = async (page, perPage) => {
   try {
     page = parseInt(page, 10) || 1;
@@ -109,10 +138,26 @@ const loginUser = async (email, password) => {
   }
 };
 
+const userMasukkanEmail = async (email) => {
+  try {
+    const userEmail = await User.findUnique({ where: { email: email } });
+    if (!userEmail) throw new Error('Email tidak ditemukan');
+
+    return userEmail;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const userUbahPassword = async (password) => {};
+
 module.exports = {
+  createUser,
   fetchUsers,
   updateUserbyId,
   removeUserbyId,
   registerUser,
   loginUser,
+  userMasukkanEmail,
+  userUbahPassword,
 };
