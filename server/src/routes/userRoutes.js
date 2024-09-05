@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const passport = require('passport');
 
 const User = require('../controller/userController');
 const registervalidator = require('../utils/registerValidator');
 const isAuthenticated = require('../middleware/authenication');
 const Ensure = require('../middleware/authorization');
+const cekKodeOTP = require('../middleware/kodeOTP');
+const passport = require('passport');
 
 // Admin routes
 router.post(
@@ -15,19 +16,38 @@ router.post(
   registervalidator,
   User.createuserHandler
 );
-router.get('/admin', isAuthenticated, Ensure.isAdmin, User.fetchUserHandler);
+router.get(
+  '/admin/dataUsers',
+  isAuthenticated,
+  Ensure.isAdmin,
+  User.fetchUserHandler
+);
 router.post(
-  '/admin/:id',
+  '/admin/ubahDataUser/:id',
   isAuthenticated,
   Ensure.isAdmin,
   User.updateUserbyIdHandler
 );
 
 router.delete(
-  '/admin/:id',
+  '/admin/hapusUser/:id',
   isAuthenticated,
   Ensure.isAdmin,
   User.removeUserbyIdHandler
+);
+
+router.get(
+  '/admin/searchUser',
+  isAuthenticated,
+  Ensure.isAdmin,
+  User.searchUserByNameandEmailHandler
+);
+
+router.get(
+  '/admin/filterUser',
+  isAuthenticated,
+  Ensure.isAdmin,
+  User.filterUserHandler
 );
 
 // Auth routes
@@ -43,7 +63,35 @@ router.get('/logout', (req, res) => {
   });
 });
 
+router.post('/sendEmail', User.userMasukkanEmailHandler);
+router.post('/cekOTP', cekKodeOTP);
+router.patch('/resetPassword', User.userUbahPasswordHandler);
+router.get('/requestNewOTP', User.NewOTPHandler);
 
+router.get(
+  '/auth/google',
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+  }),
+  (req, res) => {
+    res.status(200).send('Anda berhasil masuk lewat akun Google');
+  }
+);
+
+router.get(
+  '/auth/google',
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+  })
+);
+
+router.get(
+  '/auth/google/callback',
+  passport.authenticate('google'),
+  (req, res) => {
+    res.redirect('your homepage frontend link');
+  }
+);
 
 router.get('/protected', isAuthenticated, (req, res) => {
   res.status(200).json({ message: 'Anda memiliki akses ke route ini' });

@@ -1,26 +1,15 @@
+// schema.prisma
+
+datasource db {
+  provider = "mysql" 
+  url      = env("DATABASE_URL")
+}
 
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
-}
-
-model User {
-  id               Int      @id @default(autoincrement())
-  username         String   @unique
-  email            String   @unique
-  passwordHash     String
-  role             Role     @default(READER)
-  subscriptionPlan SubscriptionPlan? @default(FREE)
-  profilePicture   String?
-  bio              String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-}
-
+// Definisi Enum Role
 enum Role {
   ADMIN
   EDITOR
@@ -28,8 +17,218 @@ enum Role {
   READER
 }
 
-enum SubscriptionPlan {
-  FREE
-  BASIC
-  PREMIUM
+
+model User {
+  id                Int               @id @default(autoincrement())
+  username          String            @unique
+  email             String            @unique
+  passwordHash      String
+  role              Role @default(READER)
+  subscriptionId    Int?
+  Subscription      Subscription?     @relation(fields: [subscriptionId], references: [id])
+  gender          String?  // Nullable field
+  bio             String?  // Nullable field
+  dateOfBirth     DateTime? // Nullable field
+  phoneNumber     String?  // Nullable field
+  address         String?  // Nullable field
+  province        String?  // Nullable field
+  city            String?  // Nullable field
+  postalCode      String?  // Nullable field
+  lastEducation   String?  // Nullable field
+  jobType         String?  // Nullable field
+  articles          Article[]         @relation("ArticleAuthor")
+  comments          Comment[]
+  likesDislikes     LikeDislike[]
+  savedArticles     SavedArticle[]
+  media             Media[]
+  videos            Video[]           @relation("VideoAuthor")
+  videoComments     VideoComment[]
+  videoLikesDislikes VideoLikeDislike[]
+  savedVideos       SavedVideo[]
+  subscriptionPayments SubscriptionPayment[]
+  userSubscriptions UserSubscription[]
+  passwordResets PasswordReset[] // Sisi 1
+  createdAt DateTime @default(now()) 
+  updatedAt DateTime @updatedAt @default(now()) 
+}
+
+model Subscription {
+  id                Int                @id @default(autoincrement())
+  name              String
+  description       String
+  price             Float
+  benefits          String
+  users             User[]
+  subscriptionPayments SubscriptionPayment[]
+  userSubscriptions UserSubscription[]
+}
+
+model Article {
+  id                Int                @id @default(autoincrement())
+  title             String
+  content           String
+  authorId          Int
+  author            User               @relation("ArticleAuthor", fields: [authorId], references: [id])
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  publishedAt       DateTime?
+  comments          Comment[]
+  likesDislikes     LikeDislike[]
+  savedArticles     SavedArticle[]
+  media             Media[]
+}
+
+model Comment {
+  id                Int                @id @default(autoincrement())
+  articleId         Int
+  userId            Int
+  comment           String
+  createdAt         DateTime           @default(now())
+  article           Article            @relation(fields: [articleId], references: [id])
+  user              User               @relation(fields: [userId], references: [id])
+}
+
+model LikeDislike {
+  id                Int                @id @default(autoincrement())
+  articleId         Int
+  userId            Int
+  reactionType      String
+  createdAt         DateTime           @default(now())
+  article           Article            @relation(fields: [articleId], references: [id])
+  user              User               @relation(fields: [userId], references: [id])
+}
+
+model SavedArticle {
+  id                Int                @id @default(autoincrement())
+  articleId         Int
+  userId            Int
+  createdAt         DateTime           @default(now())
+  article           Article            @relation(fields: [articleId], references: [id])
+  user              User               @relation(fields: [userId], references: [id])
+}
+
+model Media {
+  id                Int                @id @default(autoincrement())
+  articleId         Int
+  mediaType         String
+  mediaUrl          String
+  mediaDescription  String
+  createdAt         DateTime           @default(now())
+  article           Article            @relation(fields: [articleId], references: [id])
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])  // Sisi 2
+}
+
+model Video {
+  id                Int                @id @default(autoincrement())
+  title             String
+  description       String
+  url               String
+  authorId          Int
+  author            User               @relation("VideoAuthor", fields: [authorId], references: [id])
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  publishedAt       DateTime?
+  videoComments     VideoComment[]
+  videoLikesDislikes VideoLikeDislike[]
+  savedVideos       SavedVideo[]
+}
+
+model VideoComment {
+  id                Int                @id @default(autoincrement())
+  videoId           Int
+  userId            Int
+  comment           String
+  createdAt         DateTime           @default(now())
+  video            Video               @relation(fields: [videoId], references: [id])
+  user              User               @relation(fields: [userId], references: [id])
+}
+
+model VideoLikeDislike {
+  id                Int                @id @default(autoincrement())
+  videoId           Int
+  userId            Int
+  reactionType      String
+  createdAt         DateTime           @default(now())
+  video             Video              @relation(fields: [videoId], references: [id])
+  user              User               @relation(fields: [userId], references: [id])
+}
+
+model SavedVideo {
+  id                Int                @id @default(autoincrement())
+  videoId           Int
+  userId            Int
+  createdAt         DateTime           @default(now())
+  video             Video              @relation(fields: [videoId], references: [id])
+  user              User               @relation(fields: [userId], references: [id])
+}
+
+model SubscriptionPayment {
+  id                Int                @id @default(autoincrement())
+  userId            Int
+  subscriptionId    Int
+  amount            Float
+  paymentDate       DateTime
+  user              User               @relation(fields: [userId], references: [id])
+  subscription      Subscription      @relation(fields: [subscriptionId], references: [id])
+}
+
+model UserSubscription {
+  id                Int                @id @default(autoincrement())
+  userId            Int
+  subscriptionId    Int
+  startDate         DateTime
+  endDate           DateTime
+  user              User               @relation(fields: [userId], references: [id])
+  subscription      Subscription      @relation(fields: [subscriptionId], references: [id])
+}
+
+model SiteSetting {
+  id              Int      @id @default(autoincrement())
+  siteName        String
+  siteDescription String
+  siteUrl         String
+  timezone        String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model SecuritySetting {
+  id                         Int      @id @default(autoincrement())
+  enableHttps                Boolean
+  passwordMinLength          Int
+  passwordRequirements      String
+  twoFactorAuthentication    Boolean
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+}
+
+model BackupSetting {
+  id              Int      @id @default(autoincrement())
+  backupFrequency String
+  backupLocation  String
+  lastBackup      DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model EmailSetting {
+  id            Int      @id @default(autoincrement())
+  smtpServer    String
+  smtpPort      Int
+  smtpUsername  String
+  smtpPassword  String
+  fromAddress   String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model PasswordReset {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+
 }
