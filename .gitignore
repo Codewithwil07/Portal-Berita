@@ -36,3 +36,5 @@ package-lock.json
 # Coveralls
 .coveralls.yml
 
+# files
+googleAuth.js
