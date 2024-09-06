@@ -7,6 +7,7 @@ const isAuthenticated = require('../middleware/authenication');
 const Ensure = require('../middleware/authorization');
 const cekKodeOTP = require('../middleware/kodeOTP');
 const passport = require('passport');
+const validPass = require('../utils/resetPassValidator');
 
 // Admin routes
 router.post(
@@ -58,15 +59,15 @@ router.post('/login', User.loginUserHandler);
 router.get('/logout', (req, res) => {
   req.session.destroy((err) => {
     if (err) return res.status(500).json({ message: 'internal server error' });
-    res.clearCookie('mycookie');
+    res.clearCookie('cookie');
     return res.status(200).json({ message: 'berhasil logout' });
   });
 });
 
 router.post('/sendEmail', User.userMasukkanEmailHandler);
 router.post('/cekOTP', cekKodeOTP);
-router.patch('/resetPassword', User.userUbahPasswordHandler);
-router.get('/requestNewOTP', User.NewOTPHandler);
+router.patch('/resetPassword', validPass, User.userUbahPasswordHandler);
+router.patch('/newOTP', User.NewOTPHandler);
 
 router.get(
   '/auth/google',

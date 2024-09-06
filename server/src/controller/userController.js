@@ -122,7 +122,6 @@ exports.loginUserHandler = async (req, res) => {
     req.session.isAuthenticated = true;
     req.session.role = user.role;
     req.session.email = user.email;
-    req.session.id = user.id;
 
     res.status(200).send({ message: 'User berhasil login' });
   } catch (error) {
@@ -148,7 +147,9 @@ exports.userMasukkanEmailHandler = async (req, res) => {
   try {
     const userEmail = await userService.simpanToken(email);
 
-    req.session.id = userEmail.id;
+    req.session.userId = userEmail.id;
+
+    console.log(req.session.userId);
 
     res.status(200).send('Kode verifikasi telah dikirim ke email Anda');
   } catch (error) {
@@ -158,27 +159,15 @@ exports.userMasukkanEmailHandler = async (req, res) => {
 };
 
 exports.userUbahPasswordHandler = async (req, res) => {
-  const { password, confPassword } = req.body;
-  body('password')
-    .isLength({ min: 8 })
-    .withMessage('Password harus memiliki panjang minimal 8 karakter')
-    .matches(/\d/)
-    .withMessage('Password harus mengandung setidaknya satu angka')
-    .matches(/[!@#$%^&*(),.?":{}|<>]/)
-    .withMessage('Password harus mengandung setidaknya satu karakter khusus')
-    .trim();
-
-  const error = validationResult(req);
-  if (!error.isEmpty()) return res.status(400).json({ errors: error.array() });
+  const { password } = req.body;
 
   try {
     const userPassword = await userService.masukkanPassword(
       password,
-      confPassword,
-      req.session.id
+      req.session.userId
     );
 
-    res.status(200).json({ messgae: 'Password berhasil di ubah' });
+    res.status(200).json({ msg: 'Password berhasil di ubah' });
   } catch (error) {
     if (error.message) return res.status(400).json(error.message);
     res.status(500).send('internal server error');
@@ -187,10 +176,11 @@ exports.userUbahPasswordHandler = async (req, res) => {
 
 exports.NewOTPHandler = async (req, res) => {
   try {
-    const email = req.session.email;
-    const id = req.session.id;
+    const userId = req.session.userId;
 
-    const newOTP = await newOTP(email, id);
+    console.log(userId);
+
+    const newOTP = await newOTP(userId);
 
     res.status(200).send('Kode baru berhasil di kirim');
   } catch (error) {

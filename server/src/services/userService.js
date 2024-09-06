@@ -1,5 +1,6 @@
 const { User, ResetPassword } = require('../model/user.model');
 const bcrypt = require('bcrypt');
+const sendEmail = require('../utils/email');
 
 // Administrator
 const createUser = async (username, email, password, role) => {
@@ -197,7 +198,11 @@ const simpanToken = async (email) => {
       });
     }
 
-    console.alert(`Kode OTP anda adalah {token}`);
+    const subject = `Lupa Password`;
+    const text = `<p>Kode OTP anda adalah <b>${token}</b></p>`;
+    await sendEmail(email, subject, text)
+      .then((response) => console.log('Email sent: ', response))
+      .catch((err) => console.error(err.message));
 
     return user;
   } catch (error) {
@@ -205,13 +210,11 @@ const simpanToken = async (email) => {
   }
 };
 
-const masukkanPassword = async (password, confPassword, id) => {
+const masukkanPassword = async (password, id) => {
   try {
-    let newPassword = password === confPassword;
+    const newPassword = await bcrypt.hash(password, 10);
 
-    if (!newPassword) new Error('password Tidak cocok');
-
-    newPassword = await bcrypt.hash(password, 10);
+    console.log(id);
 
     const userPassword = await User.update({
       where: { id: id },
@@ -224,27 +227,29 @@ const masukkanPassword = async (password, confPassword, id) => {
   }
 };
 
-const newOTP = async (email, id) => {
-  token = Math.floor(1000 + Math.random() * 9000);
+const newOTP = async (id) => {
+  const token = Math.floor(1000 + Math.random() * 9000);
   const date = new Date();
   const newDate = new Date(date.getTime() + 1 * 60 * 1000);
 
-  if (email) {
-    const updateOTPonDatabase = await ResetPassword.update({
-      where: { userId: id },
-      data: {
-        token: token.toString(),
-        expiresAt: newDate,
-        user: {
-          connect: { id: id },
-        },
+  const updateOTPonDatabase = await ResetPassword.update({
+    where: { userId: id },
+    data: {
+      token: token.toString(),
+      expiresAt: newDate,
+      user: {
+        connect: { id: id },
       },
-    });
-  }
+    },
+  });
 
   const subject = `Lupa Password`;
-  const text = `Kode verifikasi anda adalah ${token}`;
-  await kirimEmail(email, subject, text);
+  const text = `<p>Kode OTP anda adalah <b>${token}</b></p>`;
+  await sendEmail(email, subject, text)
+    .then((response) => console.log('Email sent: ', response))
+    .catch((err) => console.error(err.message));
+    
+  return updateOTPonDatabase;
 };
 
 module.exports = {
