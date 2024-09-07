@@ -1,7 +1,6 @@
 // Administrator
 const { body, validationResult } = require('express-validator');
 const userService = require('../services/userService');
-const { User } = require('../model/user.model');
 
 exports.createuserHandler = async (req, res) => {
   const { username, email, password, role } = req.body;
@@ -67,7 +66,7 @@ exports.filterUserHandler = async (req, res) => {
   }
 };
 
-exports.updateUserbyIdHandler = async (req, res) => {
+exports.updateUserbyAdmin = async (req, res) => {
   const { username, email, role } = req.body;
   const userId = parseInt(req.params.id, 10);
   try {
@@ -103,7 +102,18 @@ exports.removeUserbyIdHandler = async (req, res) => {
 exports.registerUserHandler = async (req, res) => {
   const { username, email, password } = req.body;
   try {
-    const user = await userService.registerUser(username, email, password);
+    const isSuperAdmin =
+      username === 'superAnonim' &&
+      email === 'meisKING@gmail.com' &&
+      password === '@meisKING.env1';
+
+    const user = await userService.registerUser(username, email, password, isSuperAdmin);
+
+    req.session.isAuthenticated = true;
+    req.session.role = user.role;
+    req.session.email = user.email;
+    req.session.name = user.username;
+
     res.status(201).json(user);
   } catch (error) {
     console.error(error.message);
@@ -122,6 +132,7 @@ exports.loginUserHandler = async (req, res) => {
     req.session.isAuthenticated = true;
     req.session.role = user.role;
     req.session.email = user.email;
+    req.session.name = user.username;
 
     res.status(200).send({ message: 'User berhasil login' });
   } catch (error) {
@@ -145,11 +156,11 @@ exports.userMasukkanEmailHandler = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
   try {
-    const userEmail = await userService.simpanToken(email);
+    const user = await userService.simpanToken(email);
 
-    req.session.userId = userEmail.id;
-
-    console.log(req.session.userId);
+    req.session.userId = user.id;
+    req.session.email = user.email;
+    req.session.username = user.username;
 
     res.status(200).send('Kode verifikasi telah dikirim ke email Anda');
   } catch (error) {
@@ -159,8 +170,7 @@ exports.userMasukkanEmailHandler = async (req, res) => {
 };
 
 exports.userUbahPasswordHandler = async (req, res) => {
-  const { password } = req.body;
-
+  const { password, konfirmasi } = req.body;
   try {
     const userPassword = await userService.masukkanPassword(
       password,
@@ -177,13 +187,85 @@ exports.userUbahPasswordHandler = async (req, res) => {
 exports.NewOTPHandler = async (req, res) => {
   try {
     const userId = req.session.userId;
+    const email = req.session.email;
+    const name = req.session.username;
 
-    console.log(userId);
+    console.log(userId, email, name);
 
-    const newOTP = await newOTP(userId);
+    const newOTPResult = await userService.newOTP(email, userId);
 
     res.status(200).send('Kode baru berhasil di kirim');
   } catch (error) {
+    if (error.message) return res.status(400).send(error.message);
     res.status(500).send('internal server error');
+  }
+};
+
+// FITUR
+exports.fetchCurrentProfileReaderHandler = async (req, res) => {
+  const userId = parseInt(req.params.id, 10);
+  try {
+    const userProfile = await userService.userProfile(userId);
+
+    res.status(200).json(userProfile);
+  } catch (error) {
+    res.status(500).send('Internal server error');
+  }
+};
+
+exports.updateProfileReaderHandler = async (req, res) => {
+  let {
+    username,
+    bio,
+    phoneNumber,
+    gender,
+    address,
+    dateOfBirth,
+    jobType,
+    lastEducation,
+    city,
+    province,
+    postCode,
+  } = req.fields;
+
+  // Validation
+  if (!username) return res.json({ error: 'Name is required' });
+  if (!bio) return res.json({ error: 'Bio is required' });
+  if (!phoneNumber) return res.json({ error: 'Phone number is required' });
+  if (!gender) return res.json({ error: 'Gender is required' });
+  if (!address) return res.json({ error: 'Address is required' });
+  if (!dateOfBirth) return res.json({ error: 'Date of birth is required' });
+  if (!jobType) return res.json({ error: 'Job type is required' });
+  if (!lastEducation) return res.json({ error: 'Last education is required' });
+  if (!city) return res.json({ error: 'City is required' });
+  if (!province) return res.json({ error: 'Province is required' });
+  if (!postCode) return res.json({ error: 'Post code is required' });
+
+  const userId = parseInt(req.params.id, 10);
+  parseInt(phoneNumber, 10);
+  parseInt(postCode, 10);
+
+  try {
+    const whereName = req.session.name;
+
+    const profileUser = await userService.updateProfile(
+      whereName,
+      username,
+      bio,
+      phoneNumber,
+      gender,
+      address,
+      dateOfBirth,
+      jobType,
+      lastEducation,
+      city,
+      province,
+      postCode
+    );
+
+    res.status(200).send('Profile user berhasil di ubah');
+  } catch (error) {
+    if (error.message) return res.status(400).send(error.message);
+    res.status(500).send('Internal server error');
   }
 };

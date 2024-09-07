@@ -1,6 +1,7 @@
 const { User, ResetPassword } = require('../model/user.model');
 const bcrypt = require('bcrypt');
 const sendEmail = require('../utils/email');
+const { format } = require('date-fns');
 
 // Administrator
 const createUser = async (username, email, password, role) => {
@@ -41,7 +42,7 @@ const fetchUsers = async (page, perPage) => {
     page = parseInt(page, 10) || 1;
     perPage = parseInt(perPage, 10) || 10;
 
-    const isAdmin = 'ADMIN';
+    const isSUPER_Admin = 'SUPER_ADMIN';
 
     const offsetPage = (page - 1) * perPage;
     const endIndex = offsetPage + perPage;
@@ -49,7 +50,7 @@ const fetchUsers = async (page, perPage) => {
     const users = await User.findMany({
       skip: offsetPage,
       take: perPage,
-      where: { role: { notIn: isAdmin } },
+      where: { role: { notIn: isSUPER_Admin } },
     });
 
     const totalUsers = await User.count();
@@ -76,8 +77,6 @@ const searchUser = (search) => {
 };
 
 const filterUser = (role, subsId) => {
-  console.log(role);
-
   const filters = User.findMany({
     where: {
       AND: [{ role: role || undefined }, { role: { notIn: ['ADMIN'] } }],
@@ -88,10 +87,8 @@ const filterUser = (role, subsId) => {
 };
 
 const updateUserbyId = async (userId, data) => {
-  const username = data.username;
-  const email = data.email;
   try {
-    if (!username || !email) throw new Error('Form tidak boleh kosong');
+    if (data === undefined) throw new Error('Form tidak boleh kosong');
 
     const existingUser = await User.findUnique({ where: { username } });
     if (existingUser) {
@@ -136,23 +133,31 @@ const removeUserbyId = async (userId) => {
 };
 
 // Auth
-const registerUser = async (username, email, password) => {
+const registerUser = async (username, email, password, isSuperAdmin) => {
   try {
-    const existingUser = await User.findUnique({ where: { username } });
+    const [existingUser, existingEmail] = await Promise.all([
+      User.findUnique({ where: { username } }),
+      User.findUnique({ where: { email } }),
+    ]);
+
     if (existingUser) {
       throw new Error('Username sudah ada');
     }
-
-    const existingEmail = await User.findUnique({ where: { email } });
     if (existingEmail) {
       throw new Error('Email sudah ada');
     }
+
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = await User.create({
-      data: { username: username, email: email, passwordHash: hashedPassword },
+      data: {
+        username: username,
+        email: email,
+        passwordHash: hashedPassword,
+        role: isSuperAdmin ? 'SUPER_ADMIN' : 'READER',
+      },
     });
 
     return newUser;
@@ -189,7 +194,7 @@ const simpanToken = async (email) => {
     if (user) {
       const saveOTPtoDatabase = await ResetPassword.create({
         data: {
-          token: token.toString(),
+          token: token,
           expiresAt: newDate,
           user: {
             connect: { id: user.id },
@@ -214,8 +219,6 @@ const masukkanPassword = async (password, id) => {
   try {
     const newPassword = await bcrypt.hash(password, 10);
 
-    console.log(id);
-
     const userPassword = await User.update({
       where: { id: id },
       data: { passwordHash: newPassword },
@@ -227,29 +230,96 @@ const masukkanPassword = async (password, id) => {
   }
 };
 
-const newOTP = async (id) => {
-  const token = Math.floor(1000 + Math.random() * 9000);
-  const date = new Date();
-  const newDate = new Date(date.getTime() + 1 * 60 * 1000);
+const newOTP = async (email, userId, name) => {
+  try {
+    const token = Math.floor(1000 + Math.random() * 9000);
+    const date = new Date();
+    const newDate = new Date(date.getTime() + 1 * 60 * 1000);
 
-  const updateOTPonDatabase = await ResetPassword.update({
-    where: { userId: id },
+    const oldToken = await ResetPassword.findFirst({
+      where: { userId: userId },
+    });
+
+    if (!oldToken) throw new Error('User not found');
+
+    let updateOTPonDatabase;
+
+    if (oldToken) {
+      updateOTPonDatabase = await ResetPassword.update({
+        where: { id: oldToken.id },
+        data: {
+          token: token,
+          expiresAt: newDate,
+          user: {
+            connect: { id: userId },
+          },
+        },
+      });
+    }
+
+    const subject = `Lupa Password`;
+    const text = `<p>Kode OTP anda adalah <b>${token}</b></p>`;
+    await sendEmail(email, subject, text)
+      .then((response) => console.log('Email sent: ', response))
+      .catch((err) => console.error(err.message));
+
+    return updateOTPonDatabase;
+  } catch (error) {
+    throw error;
+  }
+};
+
+//fitur
+const userProfile = async (userid) => {
+  if (!userid) throw new Error('UserId is required');
+
+  const user = await User.findFirst({ where: { id: userid } });
+  if (!user) throw new Error('User not found');
+  return user;
+};
+
+const updateProfile = async (
+  whereName,
+  username,
+  bio,
+  phoneNumber,
+  gender,
+  address,
+  dateOfBirth,
+  jobType,
+  lastEducation,
+  city,
+  province,
+  postCode
+) => {
+  let parseDate = format(
+    new Date(`${dateOfBirth}:00:00:00`),
+    "yyyy-MM-dd'T'HH:mm:ss'Z'"
+  );
+
+  const updateUser = await User.update({
+    where: { username: whereName },
     data: {
-      token: token.toString(),
-      expiresAt: newDate,
-      user: {
-        connect: { id: id },
-      },
+      username: username,
+      bio: bio,
+      phoneNumber: phoneNumber,
+      gender: gender,
+      address: address,
+      dateOfBirth: parseDate,
+      jobType: jobType,
+      lastEducation: lastEducation,
+      province: province,
+      city: city,
+      postalCode: postCode,
+      city: city,
     },
-  });
+  })
+    .then(() => {
+      (d) => console.log(d);
+    })
+    .catch((err) => console.log(err.message));
 
-  const subject = `Lupa Password`;
-  const text = `<p>Kode OTP anda adalah <b>${token}</b></p>`;
-  await sendEmail(email, subject, text)
-    .then((response) => console.log('Email sent: ', response))
-    .catch((err) => console.error(err.message));
-    
-  return updateOTPonDatabase;
+  return updateUser;
 };
 
 module.exports = {
@@ -264,4 +334,6 @@ module.exports = {
   simpanToken,
   masukkanPassword,
   newOTP,
+  updateProfile,
+  userProfile,
 };

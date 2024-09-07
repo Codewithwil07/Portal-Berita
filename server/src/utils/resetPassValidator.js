@@ -10,11 +10,11 @@ const validPass = [
     .withMessage('Password harus mengandung setidaknya satu karakter khusus')
     .trim(),
 
-  body('confPassword').custom((value, { req }) => {
-    if (confPassword !== req.body.password) {
-      throw new Error('Password confirmation tidak sama dengan kolom password');
+  body('konfirmasi').custom((value, { req }) => {
+    if (value !== req.body.password) {
+      throw new Error('Passwords do not match');
     }
-    return true;
+    return true
   }),
 
   (req, res, next) => {

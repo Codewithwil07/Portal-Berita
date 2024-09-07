@@ -43,6 +43,9 @@ app.use(cookie());
 
 app.use('/api/users', userRoutes);
 
+const _dirname = path.resolve();
+app.use('/uploads', express.static(_dirname + '/uploads'));
+
 const PORT = process.env.PORT || 3443;
 
 https

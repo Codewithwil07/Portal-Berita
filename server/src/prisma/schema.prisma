@@ -11,6 +11,7 @@ generator client {
 
 // Definisi Enum Role
 enum Role {
+  SUPER_ADMIN
   ADMIN
   EDITOR
   WRITER
@@ -19,14 +20,15 @@ enum Role {
 
 
 model User {
-  id                Int               @id @default(autoincrement())
-  username          String            @unique
-  email             String            @unique
-  passwordHash      String
-  role              Role @default(READER)
-  subscriptionId    Int?
-  Subscription      Subscription?     @relation(fields: [subscriptionId], references: [id])
+  id              Int               @id @default(autoincrement())
+  username        String            @unique
+  email           String            @unique
+  passwordHash    String
+  role            Role @default(READER)
+  subscriptionId  Int?
+  Subscription    Subscription?     @relation(fields: [subscriptionId], references: [id])
   gender          String?  // Nullable field
+  image           String? // Nullable field
   bio             String?  // Nullable field
   dateOfBirth     DateTime? // Nullable field
   phoneNumber     String?  // Nullable field
@@ -36,13 +38,13 @@ model User {
   postalCode      String?  // Nullable field
   lastEducation   String?  // Nullable field
   jobType         String?  // Nullable field
-  articles          Article[]         @relation("ArticleAuthor")
-  comments          Comment[]
-  likesDislikes     LikeDislike[]
-  savedArticles     SavedArticle[]
-  media             Media[]
-  videos            Video[]           @relation("VideoAuthor")
-  videoComments     VideoComment[]
+  articles        Article[]         @relation("ArticleAuthor")
+  comments        Comment[]
+  likesDislikes   LikeDislike[]
+  savedArticles   SavedArticle[]
+  media           Media[]
+  videos          Video[]           @relation("VideoAuthor")
+  videoComments   VideoComment[]
   videoLikesDislikes VideoLikeDislike[]
   savedVideos       SavedVideo[]
   subscriptionPayments SubscriptionPayment[]
@@ -225,10 +227,9 @@ model EmailSetting {
 
 model PasswordReset {
   id        Int      @id @default(autoincrement())
-  token     String   @unique
+  token     Int   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
-
 }

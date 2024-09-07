@@ -8,6 +8,7 @@ const Ensure = require('../middleware/authorization');
 const cekKodeOTP = require('../middleware/kodeOTP');
 const passport = require('passport');
 const validPass = require('../utils/resetPassValidator');
+const formidable = require('express-formidable');
 
 // Admin routes
 router.post(
@@ -24,10 +25,10 @@ router.get(
   User.fetchUserHandler
 );
 router.post(
-  '/admin/ubahDataUser/:id',
+  '/admin/EditProfileUser/:id',
   isAuthenticated,
   Ensure.isAdmin,
-  User.updateUserbyIdHandler
+  User.updateUserbyAdmin
 );
 
 router.delete(
@@ -53,9 +54,7 @@ router.get(
 
 // Auth routes
 router.post('/register', registervalidator, User.registerUserHandler);
-
 router.post('/login', User.loginUserHandler);
-
 router.get('/logout', (req, res) => {
   req.session.destroy((err) => {
     if (err) return res.status(500).json({ message: 'internal server error' });
@@ -63,12 +62,10 @@ router.get('/logout', (req, res) => {
     return res.status(200).json({ message: 'berhasil logout' });
   });
 });
-
 router.post('/sendEmail', User.userMasukkanEmailHandler);
 router.post('/cekOTP', cekKodeOTP);
 router.patch('/resetPassword', validPass, User.userUbahPasswordHandler);
 router.patch('/newOTP', User.NewOTPHandler);
-
 router.get(
   '/auth/google',
   passport.authenticate('google', {
@@ -78,14 +75,12 @@ router.get(
     res.status(200).send('Anda berhasil masuk lewat akun Google');
   }
 );
-
 router.get(
   '/auth/google',
   passport.authenticate('google', {
     scope: ['profile', 'email'],
   })
 );
-
 router.get(
   '/auth/google/callback',
   passport.authenticate('google'),
@@ -93,6 +88,17 @@ router.get(
     res.redirect('your homepage frontend link');
   }
 );
+
+// Fitur Routes
+router
+  .route('/reader/detailProfile/:id')
+  .put(
+    isAuthenticated,
+    Ensure.isReader,
+    formidable(),
+    User.updateProfileReaderHandler
+  )
+  .get(isAuthenticated, Ensure.isReader, User.fetchCurrentProfileReaderHandler);
 
 router.get('/protected', isAuthenticated, (req, res) => {
   res.status(200).json({ message: 'Anda memiliki akses ke route ini' });

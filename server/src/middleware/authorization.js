@@ -19,5 +19,11 @@ const isWriter = (req, res, next) => {
   }
   res.status(401).send('Kamu bukan Writer');
 };
+const isReader = (req, res, next) => {
+  if (req.session.role === 'READER') {
+    return next();
+  }
+  res.status(401).send('Kamu bukan Reaader');
+};
 
-module.exports = { isAdmin, isEditor, isWriter };
+module.exports = { isAdmin, isEditor, isWriter, isReader };
