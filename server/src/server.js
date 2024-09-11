@@ -10,9 +10,12 @@ const helmet = require('helmet');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const cookie = require('cookie-parser');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('../src/swagger.json'); // Ata
 dotenv.config();
 
 const userRoutes = require('./routes/userRoutes');
+const uploadImageRoutes = require('./routes/uploadImage');
 
 const redisClient = new Redis();
 
@@ -31,6 +34,8 @@ app.use(
   })
 );
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 const sslOptions = {
   key: fs.readFileSync(path.join(__dirname, 'server.key')),
   cert: fs.readFileSync(path.join(__dirname, 'server.cert')),
@@ -42,6 +47,7 @@ app.use(cors());
 app.use(cookie());
 
 app.use('/api/users', userRoutes);
+app.use('/api/uploadImage', uploadImageRoutes);
 
 const _dirname = path.resolve();
 app.use('/uploads', express.static(_dirname + '/uploads'));

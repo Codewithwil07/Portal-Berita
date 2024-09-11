@@ -4,6 +4,7 @@ const userService = require('../services/userService');
 
 exports.createuserHandler = async (req, res) => {
   const { username, email, password, role } = req.body;
+
   try {
     const newUser = await userService.createUser(
       username,
@@ -69,6 +70,8 @@ exports.filterUserHandler = async (req, res) => {
 exports.updateUserbyAdmin = async (req, res) => {
   const { username, email, role } = req.body;
   const userId = parseInt(req.params.id, 10);
+
+  console.log(userId, username, email, role);
   try {
     const user = await userService.updateUserbyId(userId, {
       username,
@@ -102,12 +105,7 @@ exports.removeUserbyIdHandler = async (req, res) => {
 exports.registerUserHandler = async (req, res) => {
   const { username, email, password } = req.body;
   try {
-    const isSuperAdmin =
-      username === 'superAnonim' &&
-      email === 'meisKING@gmail.com' &&
-      password === '@meisKING.env1';
-
-    const user = await userService.registerUser(username, email, password, isSuperAdmin);
+    const user = await userService.registerUser(username, email, password);
 
     req.session.isAuthenticated = true;
     req.session.role = user.role;
@@ -241,7 +239,6 @@ exports.updateProfileReaderHandler = async (req, res) => {
   if (!province) return res.json({ error: 'Province is required' });
   if (!postCode) return res.json({ error: 'Post code is required' });
 
-  const userId = parseInt(req.params.id, 10);
   parseInt(phoneNumber, 10);
   parseInt(postCode, 10);
 

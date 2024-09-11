@@ -90,15 +90,20 @@ router.get(
 );
 
 // Fitur Routes
-router
-  .route('/reader/detailProfile/:id')
-  .put(
-    isAuthenticated,
-    Ensure.isReader,
-    formidable(),
-    User.updateProfileReaderHandler
-  )
-  .get(isAuthenticated, Ensure.isReader, User.fetchCurrentProfileReaderHandler);
+router.get(
+  '/profile/:id',
+  isAuthenticated,
+  Ensure.isReader,
+  User.fetchCurrentProfileReaderHandler
+);
+
+router.put(
+  '/profile/detailProfile',
+  isAuthenticated,
+  Ensure.isUsersBiasa,
+  formidable(),
+  User.updateProfileReaderHandler
+);
 
 router.get('/protected', isAuthenticated, (req, res) => {
   res.status(200).json({ message: 'Anda memiliki akses ke route ini' });

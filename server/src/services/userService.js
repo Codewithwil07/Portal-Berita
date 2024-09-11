@@ -6,27 +6,26 @@ const { format } = require('date-fns');
 // Administrator
 const createUser = async (username, email, password, role) => {
   try {
-    const existingUser = await User.findUnique({
-      where: { username: username },
-    });
+    const [existingUser, existingEmail] = await Promise.all([
+      User.findUnique({ where: { username: username } }),
+      User.findUnique({ where: { email: email } }),
+    ]);
 
     if (existingUser) {
       throw new Error('username sudah ada');
     }
 
-    const existingEmail = await User.findUnique({
-      where: { email: email },
-    });
-
     if (existingEmail) {
       throw new Error('Email sudah ada');
     }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
       data: {
         username: username,
         email: email,
-        passwordHash: password,
+        passwordHash: hashedPassword,
         role: role,
       },
     });
@@ -42,15 +41,13 @@ const fetchUsers = async (page, perPage) => {
     page = parseInt(page, 10) || 1;
     perPage = parseInt(perPage, 10) || 10;
 
-    const isSUPER_Admin = 'SUPER_ADMIN';
-
     const offsetPage = (page - 1) * perPage;
     const endIndex = offsetPage + perPage;
 
     const users = await User.findMany({
       skip: offsetPage,
       take: perPage,
-      where: { role: { notIn: isSUPER_Admin } },
+      where: { role: { not: 'SUPER_ADMIN' } },
     });
 
     const totalUsers = await User.count();
@@ -79,7 +76,10 @@ const searchUser = (search) => {
 const filterUser = (role, subsId) => {
   const filters = User.findMany({
     where: {
-      AND: [{ role: role || undefined }, { role: { notIn: ['ADMIN'] } }],
+      AND: [
+        { role: role || undefined },
+        { role: { notIn: ['SUPER_ADMIN', 'ADMIN'] } },
+      ],
       subscriptionId: parseInt(subsId, 10) || null,
     },
   });
@@ -90,29 +90,24 @@ const updateUserbyId = async (userId, data) => {
   try {
     if (data === undefined) throw new Error('Form tidak boleh kosong');
 
-    const existingUser = await User.findUnique({ where: { username } });
+    const [existingUser, existingEmail, validasiId] = await Promise.all([
+      User.findUnique({ where: { username: data.username } }),
+      User.findUnique({ where: { email: data.email } }),
+      User.findUnique({ where: { id: userId } }),
+    ]);
+
     if (existingUser) {
       throw new Error('Username sudah ada');
     }
-
-    const existingEmail = await User.findUnique({ where: { email } });
     if (existingEmail) {
       throw new Error('Email sudah ada');
     }
-
-    const validasiId = await User.findUnique({ where: { id: userId } });
-    if (!validasiId) throw new Error('User tidak ada');
+    if (!validasiId) throw new Error('User tidak di temukan');
 
     const userUpdated = await User.update({
       where: { id: userId },
       data: data,
     });
-
-    if (userUpdated) {
-      userUpdated.username = data.username;
-      userUpdated.email = data.email;
-      userUpdated.role = data.role;
-    }
 
     return userUpdated;
   } catch (error) {
@@ -133,7 +128,7 @@ const removeUserbyId = async (userId) => {
 };
 
 // Auth
-const registerUser = async (username, email, password, isSuperAdmin) => {
+const registerUser = async (username, email, password) => {
   try {
     const [existingUser, existingEmail] = await Promise.all([
       User.findUnique({ where: { username } }),
@@ -147,9 +142,14 @@ const registerUser = async (username, email, password, isSuperAdmin) => {
       throw new Error('Email sudah ada');
     }
 
+    const isSuperAdmin =
+      username === 'superAnonim' &&
+      email === 'meisKING@gmail.com' &&
+      password === '@meisKING.env1';
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+    console.log(isSuperAdmin);
 
     const newUser = await User.create({
       data: {
