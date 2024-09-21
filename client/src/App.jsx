@@ -1,17 +1,11 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import HompPage from './pages/HompPage';
-import AuthPage from './pages/AuthPage';
+import { Outlet } from 'react-router-dom';
 
-const App = () => {
+function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path='/' element={<HompPage />} />
-        <Route path='/auth' element={<AuthPage />} />
-      </Routes>
-    </Router>
+    <>
+      <Outlet />
+    </>
   );
-};
+}
 
 export default App;
