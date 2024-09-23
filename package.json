@@ -6,9 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "backend": "nodemon ./src/server.js",
-    "frontend": "npm run dev --prefix client",
-    "dev": "concurrently \"npm run frontend\"  \"npm run backend\"",
-    "seed": "nodemon ./src/seed.js"
+    "dev": "concurrently \"npm run frontend\"  \"npm run backend\""
   },
   "keywords": [
     "Portal",
@@ -40,6 +38,7 @@
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
+    "autoprefixer": "^10.4.20",
     "concurrently": "^8.2.2",
     "jest": "^29.7.0",
     "nodemon": "^3.1.4",

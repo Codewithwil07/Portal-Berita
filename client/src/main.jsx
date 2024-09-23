@@ -1,4 +1,3 @@
-import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
@@ -10,6 +9,8 @@ import Dashboard from './pages/admin/Dashboard';
 import UserList from './pages/admin/UserList';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import Notifications from './pages/admin/Notifications';
+import UserProfile from './pages/main/UserProfile';
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,8 @@ const router = createBrowserRouter([
         children: [
           { path: 'admin/dashboard', element: <Dashboard /> },
           { path: 'admin/users', element: <UserList /> },
+          { path: 'admin/notification', element: <Notifications /> },
+          { path: 'admin/profile', element: <UserProfile /> },
         ],
       },
       { path: 'login', element: <Login /> },
@@ -36,5 +39,5 @@ const router = createBrowserRouter([
 ]);
 
 createRoot(document.getElementById('root')).render(
-    <RouterProvider router={router} />
+  <RouterProvider router={router} />
 );
