@@ -323,7 +323,7 @@ const updateProfile = async (
 };
 
 module.exports = {
-  createUser,
+createUser,
   fetchUsers,
   searchUser,
   filterUser,

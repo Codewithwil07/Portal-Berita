@@ -109,6 +109,7 @@ exports.registerUserHandler = async (req, res) => {
 
     req.session.isAuthenticated = true;
     req.session.role = user.role;
+    req.session.userId = user.id;
     req.session.email = user.email;
     req.session.name = user.username;
 
@@ -129,6 +130,7 @@ exports.loginUserHandler = async (req, res) => {
 
     req.session.isAuthenticated = true;
     req.session.role = user.role;
+    req.session.userId = user.id;
     req.session.email = user.email;
     req.session.name = user.username;
 

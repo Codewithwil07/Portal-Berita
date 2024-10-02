@@ -15,6 +15,7 @@ const swaggerDocument = require('../src/swagger.json'); // Ata
 dotenv.config();
 
 const userRoutes = require('./routes/userRoutes');
+const articleRoutes = require('./routes/articleRoutes');
 const uploadImageRoutes = require('./routes/uploadImage');
 
 const redisClient = new Redis();
@@ -47,6 +48,7 @@ app.use(cors());
 app.use(cookie());
 
 app.use('/api/users', userRoutes);
+app.use('/api/article', articleRoutes);
 app.use('/api/uploadImage', uploadImageRoutes);
 
 const _dirname = path.resolve();
