@@ -68,12 +68,12 @@ model Subscription {
 model Article {
   id                Int                @id @default(autoincrement())
   title             String
-  content           String
+  content           String             @db.LongText 
   authorId          Int
   author            User               @relation("ArticleAuthor", fields: [authorId], references: [id])
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
-  publishedAt       DateTime?
+  publishedAt       DateTime           @default(now())
   comments          Comment[]
   likesDislikes     LikeDislike[]
   savedArticles     SavedArticle[]
@@ -130,7 +130,7 @@ model Video {
   author            User               @relation("VideoAuthor", fields: [authorId], references: [id])
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
-  publishedAt       DateTime?
+  publishedAt       DateTime           @default(now())
   videoComments     VideoComment[]
   videoLikesDislikes VideoLikeDislike[]
   savedVideos       SavedVideo[]

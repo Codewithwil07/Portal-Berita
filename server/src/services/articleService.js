@@ -1,31 +1,61 @@
 const { Article } = require('../model/article.model');
 
-const AddArticle = async (form) => {
-  // Validasi input
-  if (!form.title || !form.content || !form.authorId) {
-    throw new Error('Semua field harus terisi');
-  }
+const AddArticle = async (title, content, authorId) => {
   try {
-    // Buat artikel di database
+    // Buat artikel baru di database
     const article = await Article.create({
       data: {
-        title: form.title,
-        content: form.content,
-        authorId: form.authorId,
+        title,
+        content,
+        authorId,
       },
     });
-    // Jika gagal membuat artikel, lempar error
+
+    // Jika pembuatan artikel gagal, lemparkan error
     if (!article) {
       throw new Error('Gagal membuat artikel');
     }
-    // Kembalikan artikel yang berhasil dibuat
-    return article;
+
+    return article; // Kembalikan artikel yang berhasil dibuat
   } catch (error) {
-    // Lempar error dengan pesan yang sesuai atau default
-    throw new Error(error.message || 'Terjadi error saat menambah artikel');
+    // Tangani error dan lemparkan ke controller
+    console.error('Error in AddArticle service:', error.message);
+    throw new Error(
+      error.message || 'Terjadi kesalahan pada proses pembuatan artikel'
+    );
+  }
+};
+
+const ArticleList = async (page, perPage) => {
+  page = parseInt(page, 1) || 1;
+  perPage = parseInt(perPage, 10) || 10;
+
+  const offsetPage = (page - 1) * perPage;
+  const endIndex = offsetPage + perPage;
+  try {
+    const articles = await Article.findMany({
+      skip: offsetPage,
+      take: perPage,
+    });
+
+    const totalArticles = Article.count();
+
+    const totalPages = Math.ceil(totalArticles / perPage);
+    if (page > totalPages || page < 1) throw new Error('Halaman Tidak Valid');
+
+    const articleForPages = articles.slice(offsetPage, endIndex);
+    if (articleForPages.length === 0) throw new Error('Daftar Artikel kosong');
+
+    return { articles, totalPages, totalArticles };
+  } catch (error) {
+    console.error('Error in ArticleList service:', error.message);
+    throw new Error(
+      error.message || 'Terjadi kesalahan pada proses memuat artikel'
+    );
   }
 };
 
 module.exports = {
   AddArticle,
+  ArticleList,
 };

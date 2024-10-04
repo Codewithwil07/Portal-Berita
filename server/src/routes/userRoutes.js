@@ -114,7 +114,7 @@ router.get('/isAdmin', isAuthenticated, Ensure.isAdmin, (req, res) => {
 router.get('/isEditor', isAuthenticated, Ensure.isEditor, (req, res) => {
   res.status(200).json({ message: 'Kamu Editor' });
 });
-router.get('/isWriter', isAuthenticated, Ensure.isWriter, (req, res) => {
+router.get('/isWriter', isAuthenticated, Ensure.isAuthorizedAdminorWriter, (req, res) => {
   res.status(200).json({ message: 'Kamu Writer' });
 });
 

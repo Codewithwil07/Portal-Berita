@@ -1,8 +1,10 @@
 const isAuthenticated = (req, res, next) => {
-  if (req.session.isAuthenticated) {
+  console.log('Session:', req.session); // Debugging session
+  if (req.session && req.session.isAuthenticated) {
     return next();
   }
-  res.status(401).send('anda belum ter-autentikasi dan login lah');
+  res.status(401).json({ message: 'Anda belum ter-autentikasi. Silakan login.' });
 };
+
 
 module.exports = isAuthenticated;
