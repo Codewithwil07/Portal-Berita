@@ -4,24 +4,46 @@ const router = express.Router();
 const {
   addArticleHandler,
   articleListHandler,
+  updateArticleHandler,
 } = require('../controller/articleController');
 const formidable = require('express-formidable');
-const { isAuthorizedAdminorWriter } = require('../middleware/authorization');
+const {
+  isAuthorizedAdminorWriter,
+  isAdmin,
+} = require('../middleware/authorization');
 const isAuthenticated = require('../middleware/authenication');
 
+// Admin routes
+router.get('/articlesList', isAuthenticated, isAdmin, articleListHandler);
+
+// Writer routes
+
+// Editor routes
+
+// Admin & Writer routes
 router.post(
-  '/newPost',
+  '/articlenewPost',
   formidable(),
   isAuthenticated,
   isAuthorizedAdminorWriter,
   addArticleHandler
 );
 
-router.get(
-  '/articlesList',
+router.patch(
+  '/articleUpdate/:articleId',
+  formidable(),
   isAuthenticated,
   isAuthorizedAdminorWriter,
-  articleListHandler
+  updateArticleHandler
 );
+
+// router.delete(
+//   '/articleRemove',
+//   isAuthenticated,
+//   isAuthorizedAdminorWriter,
+//   deleteArticleHandler
+// );
+
+// Fitur routes
 
 module.exports = router;

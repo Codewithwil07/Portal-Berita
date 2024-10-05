@@ -1,4 +1,8 @@
-const { AddArticle, ArticleList } = require('../services/articleService');
+const {
+  AddArticle,
+  ArticleList,
+  updateArticle,
+} = require('../services/articleService');
 
 exports.addArticleHandler = async (req, res) => {
   try {
@@ -51,6 +55,22 @@ exports.articleListHandler = async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating article:', error.message);
+    return res
+      .status(500)
+      .json({ message: error.message || 'Terjadi kesalahan pada server' });
+  }
+};
+
+exports.updateArticleHandler = async (req, res) => {
+  const { title, content } = req.fields || {};
+  console.log(title, content);
+
+  const articleId = req.params.articleId;
+  try {
+    const article = await updateArticle(articleId, title, content);
+    res.status(200).json({ message: 'Update artikel berhasil' });
+  } catch (error) {
+    console.error('Error updating article:', error.message);
     return res
       .status(500)
       .json({ message: error.message || 'Terjadi kesalahan pada server' });
