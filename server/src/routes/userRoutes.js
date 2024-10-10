@@ -97,7 +97,7 @@ router.get(
   User.fetchCurrentProfileReaderHandler
 );
 
-router.put(
+router.patch(
   '/profile/detailProfile',
   isAuthenticated,
   Ensure.isUsersBiasa,

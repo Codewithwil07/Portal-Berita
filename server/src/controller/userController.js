@@ -229,17 +229,17 @@ exports.updateProfileReaderHandler = async (req, res) => {
   } = req.fields;
 
   // Validation
-  if (!username) return res.json({ error: 'Name is required' });
-  if (!bio) return res.json({ error: 'Bio is required' });
-  if (!phoneNumber) return res.json({ error: 'Phone number is required' });
-  if (!gender) return res.json({ error: 'Gender is required' });
-  if (!address) return res.json({ error: 'Address is required' });
-  if (!dateOfBirth) return res.json({ error: 'Date of birth is required' });
-  if (!jobType) return res.json({ error: 'Job type is required' });
-  if (!lastEducation) return res.json({ error: 'Last education is required' });
-  if (!city) return res.json({ error: 'City is required' });
-  if (!province) return res.json({ error: 'Province is required' });
-  if (!postCode) return res.json({ error: 'Post code is required' });
+  // if (!username) return res.json({ error: 'Name is required' });
+  // if (!bio) return res.json({ error: 'Bio is required' });
+  // if (!phoneNumber) return res.json({ error: 'Phone number is required' });
+  // if (!gender) return res.json({ error: 'Gender is required' });
+  // if (!address) return res.json({ error: 'Address is required' });
+  // if (!dateOfBirth) return res.json({ error: 'Date of birth is required' });
+  // if (!jobType) return res.json({ error: 'Job type is required' });
+  // if (!lastEducation) return res.json({ error: 'Last education is required' });
+  // if (!city) return res.json({ error: 'City is required' });
+  // if (!province) return res.json({ error: 'Province is required' });
+  // if (!postCode) return res.json({ error: 'Post code is required' });
 
   parseInt(phoneNumber, 10);
   parseInt(postCode, 10);

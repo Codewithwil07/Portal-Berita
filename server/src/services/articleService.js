@@ -62,12 +62,12 @@ const updateArticle = async (articleId, title, content) => {
       where: { id: parseInt(articleId, 10) },
     });
 
-    existingArticle.title = title;
-    existingArticle.content = content;
+    title = title === undefined ? existingArticle.title : title;
+    content = content === undefined ? existingArticle.content : content;
 
     const article = await Article.update({
       where: { id: parseInt(articleId, 10) },
-      data: { title, content },
+      data: {},
     });
     if (!article) throw new Error('artikel gagal di update');
 

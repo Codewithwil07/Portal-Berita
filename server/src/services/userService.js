@@ -292,10 +292,10 @@ const updateProfile = async (
   province,
   postCode
 ) => {
-  let parseDate = format(
-    new Date(`${dateOfBirth}:00:00:00`),
-    "yyyy-MM-dd'T'HH:mm:ss'Z'"
-  );
+  let parseDate =
+    dateOfBirth === null
+      ? null
+      : format(new Date(`${dateOfBirth}:00:00:00`), "yyyy-MM-dd'T'HH:mm:ss'Z'");
 
   const updateUser = await User.update({
     where: { username: whereName },
@@ -308,10 +308,9 @@ const updateProfile = async (
       dateOfBirth: parseDate,
       jobType: jobType,
       lastEducation: lastEducation,
+      city: city,
       province: province,
-      city: city,
       postalCode: postCode,
-      city: city,
     },
   })
     .then(() => {
@@ -323,7 +322,7 @@ const updateProfile = async (
 };
 
 module.exports = {
-createUser,
+  createUser,
   fetchUsers,
   searchUser,
   filterUser,
