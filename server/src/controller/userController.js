@@ -262,7 +262,7 @@ exports.updateProfileReaderHandler = async (req, res) => {
       postCode
     );
 
-    res.status(200).send('Profile user berhasil di ubah');
+    res.status(200).json(profileUser);
   } catch (error) {
     if (error.message) return res.status(400).send(error.message);
     res.status(500).send('Internal server error');

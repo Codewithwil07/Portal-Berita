@@ -292,33 +292,39 @@ const updateProfile = async (
   province,
   postCode
 ) => {
-  let parseDate =
-    dateOfBirth === null
-      ? null
-      : format(new Date(`${dateOfBirth}:00:00:00`), "yyyy-MM-dd'T'HH:mm:ss'Z'");
+  let parseDate = dateOfBirth
+    ? (function () {
+        const date = new Date(`${dateOfBirth}T00:00:00`);
+        if (isNaN(date.getTime())) {
+          throw new Error('Invalid format date');
+        }
+        return format(date, "yyyy-MM-dd'T'HH:mm:ss'Z'");
+      })()
+    : null;
 
-  const updateUser = await User.update({
-    where: { username: whereName },
-    data: {
-      username: username,
-      bio: bio,
-      phoneNumber: phoneNumber,
-      gender: gender,
-      address: address,
-      dateOfBirth: parseDate,
-      jobType: jobType,
-      lastEducation: lastEducation,
-      city: city,
-      province: province,
-      postalCode: postCode,
-    },
-  })
-    .then(() => {
-      (d) => console.log(d);
-    })
-    .catch((err) => console.log(err.message));
+  const updateData = {};
 
-  return updateUser;
+  if (username) updateData.username = username;
+  if (bio) updateData.bio = bio;
+  if (phoneNumber) updateData.phoneNumber = phoneNumber;
+  if (gender) updateData.gender = gender;
+  if (address) updateData.address = address;
+  if (parseDate) updateData.dateOfBirth = parseDate;
+  if (jobType) updateData.jobType = jobType;
+  if (lastEducation) updateData.lastEducation = lastEducation;
+  if (city) updateData.city = city;
+  if (province) updateData.province = province;
+  if (postCode) updateData.postCode = postCode;
+
+  try {
+    const updateUser = await User.update({
+      where: { username: whereName },
+      data: updateData,
+    });
+    return updateUser;
+  } catch (error) {
+    throw error;
+  }
 };
 
 module.exports = {
