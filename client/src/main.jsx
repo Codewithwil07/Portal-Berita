@@ -1,9 +1,8 @@
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import { Provider } from 'react-redux';
-import { store } from './redux/store';
+import store from './redux/store';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import App from './App';
 import Home from './pages/main/Home';
 import MainLayout from './pages/main/MainLayout';
 import AdminLayout from './pages/admin/AdminLayout';
@@ -13,6 +12,7 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import Notifications from './pages/admin/Notifications';
 import UserProfile from './pages/main/UserProfile';
+import App from './App';
 
 const router = createBrowserRouter([
   {
@@ -21,21 +21,22 @@ const router = createBrowserRouter([
     errorElement: <h1 className='text-center'>ERROR</h1>,
     children: [
       {
-        path: '/',
-        element: <MainLayout />,
-        children: [{ path: '/', element: <Home />, index: true }],
-      },
-      {
+        path: '/admin',
         element: <AdminLayout />,
         children: [
-          { path: 'admin/dashboard', element: <Dashboard /> },
-          { path: 'admin/users', element: <UserList /> },
-          { path: 'admin/notification', element: <Notifications /> },
-          { path: 'admin/profile', element: <UserProfile /> },
+          { element: <Dashboard />, index: true },
+          { path: 'dashboard', element: <Dashboard />, index: true },
+          { path: 'users', element: <UserList /> },
+          { path: 'notification', element: <Notifications /> },
+          { path: 'profile', element: <UserProfile /> },
         ],
       },
-      { path: 'login', element: <Login /> },
-      { path: 'register', element: <Register /> },
+      {
+        element: <MainLayout />,
+        children: [{ element: <Home />, index: true }],
+      },
+      { path: '/login', element: <Login /> },
+      { path: '/register', element: <Register /> },
     ],
   },
 ]);

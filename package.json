@@ -6,6 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "backend": "nodemon ./src/server.js",
+    "frontend": "npm run dev ---prefix client",
     "dev": "concurrently \"npm run frontend\"  \"npm run backend\""
   },
   "keywords": [

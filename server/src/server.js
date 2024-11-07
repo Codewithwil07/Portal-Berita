@@ -1,7 +1,5 @@
 const express = require('express');
 const app = express();
-const https = require('https');
-const fs = require('fs');
 const path = require('path');
 const session = require('express-session');
 const RedisStore = require('connect-redis').default;
@@ -20,6 +18,8 @@ const uploadImageRoutes = require('./routes/uploadImage');
 
 const redisClient = new Redis();
 
+const PORT = process.env.PORT || 3000;
+
 app.use(
   session({
     store: new RedisStore({ client: redisClient }),
@@ -37,12 +37,8 @@ app.use(
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-const sslOptions = {
-  key: fs.readFileSync(path.join(__dirname, 'server.key')),
-  cert: fs.readFileSync(path.join(__dirname, 'server.cert')),
-};
-
 app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
 app.use(cors());
 app.use(cookie());
@@ -54,8 +50,6 @@ app.use('/api/uploadImage', uploadImageRoutes);
 const _dirname = path.resolve();
 app.use('/uploads', express.static(_dirname + '/uploads'));
 
-const PORT = process.env.PORT || 3443;
-
-https
-  .createServer(sslOptions, app)
-  .listen(PORT, () => console.log('listening on port ' + PORT));
+app.listen(PORT, () => {
+  console.log('Running on port 3000');
+});
