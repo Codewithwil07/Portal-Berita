@@ -106,7 +106,7 @@ router.patch(
 );
 
 router.get('/protected', isAuthenticated, (req, res) => {
-  res.status(200).json({ message: 'Anda memiliki akses ke route ini' });
+  res.status(200).json({ message: 'Anda Memiliki akses' });
 });
 router.get('/isAdmin', isAuthenticated, Ensure.isAdmin, (req, res) => {
   res.status(200).json({ message: 'Kamu Admin' });

@@ -20,20 +20,20 @@ const redisClient = new Redis();
 
 const PORT = process.env.PORT || 3000;
 
-app.use(
-  session({
-    store: new RedisStore({ client: redisClient }),
-    secret: process.env.SECRET_KEY,
-    resave: false,
-    name: 'cookie',
-    saveUninitialized: false,
-    cookie: {
-      secure: true,
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
-    },
-  })
-);
+  app.use(
+    session({
+      store: new RedisStore({ client: redisClient }),
+      secret: process.env.SECRET_KEY,
+      resave: false,
+      name: 'cookie',
+      saveUninitialized: false,
+      cookie: {
+        secure: true,
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24, // 1 day
+      },
+    })
+  );
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 

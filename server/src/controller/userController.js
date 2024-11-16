@@ -113,7 +113,7 @@ exports.registerUserHandler = async (req, res) => {
     req.session.email = user.email;
     req.session.name = user.username;
 
-    res.status(201).json(user);
+    return res.status(201).json({ message: 'User registered' });
   } catch (error) {
     console.error(error.message);
     if (error.message) {
@@ -134,7 +134,7 @@ exports.loginUserHandler = async (req, res) => {
     req.session.email = user.email;
     req.session.name = user.username;
 
-    res.status(200).send({ message: 'User berhasil login' });
+    return res.status(200).json({ message: 'User berhasil login' });
   } catch (error) {
     if (error.message) return res.status(400).send(error.message);
     res.status(500).send('internal server error');
