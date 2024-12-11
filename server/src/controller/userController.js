@@ -134,10 +134,12 @@ exports.loginUserHandler = async (req, res) => {
     req.session.email = user.email;
     req.session.name = user.username;
 
-    return res.status(200).json({ message: 'User berhasil login' });
+    return res
+      .status(200)
+      .json({ message: 'User berhasil login', user: user.role });
   } catch (error) {
     if (error.message) return res.status(400).send(error.message);
-    res.status(500).send('internal server error');
+    return res.status(500).send('internal server error');
   }
 };
 

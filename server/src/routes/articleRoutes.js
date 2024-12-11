@@ -5,6 +5,7 @@ const {
   addArticleHandler,
   articleListHandler,
   updateArticleHandler,
+  deleteArticlehandler,
 } = require('../controller/articleController');
 const formidable = require('express-formidable');
 const {
@@ -37,12 +38,12 @@ router.patch(
   updateArticleHandler
 );
 
-// router.delete(
-//   '/articleRemove',
-//   isAuthenticated,
-//   isAuthorizedAdminorWriter,
-//   deleteArticleHandler
-// );
+router.delete(
+  '/articleRemove',
+  isAuthenticated,
+  isAuthorizedAdminorWriter,
+  deleteArticlehandler
+);
 
 // Fitur routes
 

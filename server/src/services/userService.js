@@ -143,7 +143,7 @@ const registerUser = async (username, email, password) => {
     }
 
     const isSuperAdmin =
-      username === 'superAnonim' &&
+      username === 'superAdmin' &&
       email === 'meisKING@gmail.com' &&
       password === '@meisKING.env1';
 

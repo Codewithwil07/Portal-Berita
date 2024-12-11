@@ -1,13 +1,29 @@
 const { Article } = require('../model/article.model');
+const { Category } = require('../model/categories.model');
 
-const AddArticle = async (title, content, authorId) => {
+const AddArticle = async (title, content, categoryName, authorId) => {
   try {
-    // Buat artikel baru di database
+    const category = await Category.findUnique({
+      where: { name: categoryName },
+    });
+
+    if (!category) throw new Error('Category not found');
+
+    // Buat artikel baru
     const article = await Article.create({
       data: {
-        title,
-        content,
-        authorId,
+        title: title,
+        content: content,
+        category: {
+          connect: {
+            id: parseInt(category.id, 10),
+          },
+        },
+        author: {
+          connect: {
+            id: parseInt(authorId, 10),
+          },
+        },
       },
     });
 
@@ -55,21 +71,57 @@ const ArticleList = async (page, perPage) => {
   }
 };
 
-const updateArticle = async (articleId, title, content) => {
-  if (!articleId) throw new Error('ArticleId is not found');
+const updateArticle = async (articleId, title, content, categoryName) => {
   try {
-    const existingArticle = await Article.findUnique({
+    if (!articleId || isNaN(parseInt(articleId, 10))) {
+      throw new Error('Invalid or missing article ID');
+    }
+
+    const existingArticle = await Article.findFirst({
       where: { id: parseInt(articleId, 10) },
     });
 
-    title = title === undefined ? existingArticle.title : title;
-    content = content === undefined ? existingArticle.content : content;
+    if (!existingArticle) throw new Error('Article not found');
+
+    const existingCategory = await Category.findUnique({
+      where: { name: categoryName },
+    });
+
+    if (!existingCategory) throw new Error('Category not found');
+
+    // Menangani string kosong atau undefined
+    const updatedTitle = title !== undefined && title.trim() !== "" 
+      ? title 
+      : existingArticle.title;
+
+    const updatedContent = content !== undefined && content.trim() !== "" 
+      ? content 
+      : existingArticle.content;
 
     const article = await Article.update({
       where: { id: parseInt(articleId, 10) },
-      data: {},
+      data: {
+        title: updatedTitle,
+        content: updatedContent,
+        categoryId: existingCategory.id,
+      },
     });
-    if (!article) throw new Error('artikel gagal di update');
+
+    if (!article) throw new Error('Failed to update article');
+
+    return article;
+  } catch (error) {
+    console.error('Error in updateArticle service:', error.message);
+    throw new Error(
+      error.message || 'An error occurred while updating the article'
+    );
+  }
+};
+
+const deleteArticle = (articleId) => {
+  try {
+    const article = Article.delete({ where: { id: parseInt(articleId, 10) } });
+    if (!article) throw new Error('Article not found');
 
     return article;
   } catch (error) {
@@ -84,4 +136,5 @@ module.exports = {
   AddArticle,
   ArticleList,
   updateArticle,
+  deleteArticle,
 };

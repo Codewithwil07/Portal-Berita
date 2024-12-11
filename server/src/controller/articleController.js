@@ -2,22 +2,21 @@ const {
   AddArticle,
   ArticleList,
   updateArticle,
+  deleteArticle,
 } = require('../services/articleService');
 
 exports.addArticleHandler = async (req, res) => {
   try {
     // Mengambil fields dari request
-    const { title, content } = req.fields || {};
+    const { title, content, category } = req.fields || {};
 
     // Validasi input di level controller
-    if (!title || !content) {
+    if (!title || !content || !category) {
       return res.status(400).json({ message: 'Semua field harus terisi' });
     }
 
     // Validasi session untuk memastikan user sudah login
-    const authorId = req.session?.userId; // Pastikan userId berasal dari session
-
-    console.log(authorId);
+    const authorId = req.session.userId; // Pastikan userId berasal dari session
 
     if (!authorId) {
       return res
@@ -26,7 +25,7 @@ exports.addArticleHandler = async (req, res) => {
     }
 
     // Panggil service untuk membuat artikel
-    const article = await AddArticle(title, content, authorId);
+    const article = await AddArticle(title, content, category, authorId);
 
     // Kirim respons sukses jika berhasil membuat artikel
     return res.status(201).json(article);
@@ -62,13 +61,25 @@ exports.articleListHandler = async (req, res) => {
 };
 
 exports.updateArticleHandler = async (req, res) => {
-  const { title, content } = req.fields || {};
-  console.log(title, content);
+  const { title, content, category } = req.fields || {};
+  const articleId = req.params.articleId;
 
+  try {
+    const article = await updateArticle(articleId, title, content, category);
+    res.status(201).json({ message: 'Article updated succesfully' });
+  } catch (error) {
+    console.error('Error updating article:', error.message);
+    return res
+      .status(500)
+      .json({ message: error.message || 'Terjadi kesalahan pada server' });
+  }
+};
+
+exports.deleteArticlehandler = async (req, res) => {
   const articleId = req.params.articleId;
   try {
-    const article = await updateArticle(articleId, title, content);
-    res.status(200).json({ message: 'Update artikel berhasil' });
+    const article = await deleteArticle(articleId);
+    res.status(200).json({ message: 'Article deleted successfully' });
   } catch (error) {
     console.error('Error updating article:', error.message);
     return res

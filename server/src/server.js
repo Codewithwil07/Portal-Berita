@@ -14,26 +14,27 @@ dotenv.config();
 
 const userRoutes = require('./routes/userRoutes');
 const articleRoutes = require('./routes/articleRoutes');
+const categorytRoutes = require('./routes/categoryRoutes');
 const uploadImageRoutes = require('./routes/uploadImage');
 
 const redisClient = new Redis();
 
 const PORT = process.env.PORT || 3000;
 
-  app.use(
-    session({
-      store: new RedisStore({ client: redisClient }),
-      secret: process.env.SECRET_KEY,
-      resave: false,
-      name: 'cookie',
-      saveUninitialized: false,
-      cookie: {
-        secure: true,
-        httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24, // 1 day
-      },
-    })
-  );
+app.use(
+  session({
+    store: new RedisStore({ client: redisClient }),
+    secret: process.env.SECRET_KEY,
+    resave: false,
+    name: 'cookie',
+    saveUninitialized: false,
+    cookie: {
+      secure: false, // Ubah menjadi false untuk menggunakan HTTP (bukan HTTPS)
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+    },
+  })
+);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
@@ -45,6 +46,7 @@ app.use(cookie());
 
 app.use('/api/users', userRoutes);
 app.use('/api/article', articleRoutes);
+app.use('/api/category', categorytRoutes);
 app.use('/api/uploadImage', uploadImageRoutes);
 
 const _dirname = path.resolve();

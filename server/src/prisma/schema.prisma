@@ -13,7 +13,6 @@ generator client {
 enum Role {
   SUPER_ADMIN
   ADMIN
-  EDITOR
   WRITER
   READER
 }
@@ -71,6 +70,8 @@ model Article {
   content           String             @db.LongText 
   authorId          Int
   author            User               @relation("ArticleAuthor", fields: [authorId], references: [id])
+  categoryId        Int 
+  category          Category          @relation(fields: [categoryId], references: [id])
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   publishedAt       DateTime           @default(now())
@@ -78,6 +79,16 @@ model Article {
   likesDislikes     LikeDislike[]
   savedArticles     SavedArticle[]
   media             Media[]
+}
+
+model Category {
+  id           Int        @id @default(autoincrement())
+  name         String     @unique
+  description  String?
+  articles     Article[]  // Relasi dengan tabel Article
+  videos       Video[]    // Relasi dengan tabel Video
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
 
 model Comment {
@@ -128,6 +139,8 @@ model Video {
   url               String
   authorId          Int
   author            User               @relation("VideoAuthor", fields: [authorId], references: [id])
+  categoryId  Int
+  category    Category  @relation(fields: [categoryId], references: [id])
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   publishedAt       DateTime           @default(now())

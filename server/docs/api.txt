@@ -1,0 +1,67 @@
+
+
+---
+
+#### **API Artikel**
+1. **Mendapatkan Daftar Artikel**  
+   - **GET** `/articlesList`  
+   - **Authorization**: Admin  
+   - **Deskripsi**: Mendapatkan semua artikel.  
+
+2. **Menambahkan Artikel Baru**  
+   - **POST** `/articlenewPost`  
+   - **Authorization**: Admin/Penulis  
+   - **Body**: `title`, `content`, `categoryName`, `authorId`.  
+
+3. **Memperbarui Artikel**  
+   - **PATCH** `/articleUpdate/:articleId`  
+   - **Authorization**: Admin/Penulis  
+   - **Body**: `title`, `content`, `categoryName`.  
+
+4. **Menghapus Artikel**  
+   - **DELETE** `/articleRemove`  
+   - **Authorization**: Admin/Penulis  
+   - **Body**: `articleId`.  
+
+---
+
+#### **API Kategori**
+1. **Menambahkan Kategori**  
+   - **POST** `/newCategory`  
+   - **Authorization**: Admin  
+
+2. **Mendapatkan Daftar Kategori**  
+   - **GET** `/listCategory`  
+   - **Authorization**: Admin  
+
+3. **Memperbarui Kategori**  
+   - **PUT** `/updatecategory/:categoryId`  
+   - **Authorization**: Admin  
+
+4. **Menghapus Kategori**  
+   - **DELETE** `/deleteCategory/:categoryId`  
+   - **Authorization**: Admin  
+
+---
+
+### Dokumentasi API Autentikasi (Singkat)
+
+1. **Registrasi**  
+   **POST** `/auth/register`  
+   - **Body**: `{ "username": "string", "email": "string", "password": "string" }`
+
+2. **Login**  
+   **POST** `/auth/login`  
+   - **Body**: `{ "email": "string", "password": "string" }`
+
+3. **Logout**  
+   **POST** `/auth/logout`  
+   - **Headers**: `Authorization: Bearer <token>`
+
+4. **Refresh Token**  
+   **POST** `/auth/refresh`  
+   - **Headers**: `Authorization: Bearer <refresh_token>`
+
+5. **Profil**  
+   **GET** `/auth/profile`  
+   - **Headers**: `Authorization: Bearer <token>`
